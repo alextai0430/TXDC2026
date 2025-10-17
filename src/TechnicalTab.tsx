@@ -1,36 +1,31 @@
-// ==================== src/components/ScoringTab.tsx ====================
 import React from 'react';
-import { CATEGORIES, DIFFICULTY_OPTIONS, Competitor } from '../types';
+import { CATEGORIES, DIFFICULTY_OPTIONS, Score } from './types';
 
-interface ScoringTabProps {
+interface TechnicalTabProps {
     competitorName: string;
     setCompetitorName: (name: string) => void;
-    scores: Record<string, { difficulty: number; execution: number }>;
+    scores: Record<string, Score>;
     weights: Record<string, number>;
     testMode: boolean;
     total: string;
-    competitors: Competitor[];
     onScoreChange: (category: string, type: 'difficulty' | 'execution', value: number) => void;
     onSave: () => void;
-    onDelete: (id: number) => void;
 }
 
-export default function ScoringTab({
-                                       competitorName,
-                                       setCompetitorName,
-                                       scores,
-                                       weights,
-                                       testMode,
-                                       total,
-                                       competitors,
-                                       onScoreChange,
-                                       onSave,
-                                       onDelete
-                                   }: ScoringTabProps) {
+export default function TechnicalTab({
+                                         competitorName,
+                                         setCompetitorName,
+                                         scores,
+                                         weights,
+                                         testMode,
+                                         total,
+                                         onScoreChange,
+                                         onSave
+                                     }: TechnicalTabProps) {
     return (
         <div>
             <div className="card">
-                <h2>New Competitor</h2>
+                <h2>New Competitor - Technical Scoring</h2>
                 <input
                     type="text"
                     value={competitorName}
@@ -101,27 +96,6 @@ export default function ScoringTab({
                     </button>
                 </div>
             </div>
-
-            {competitors.length > 0 && (
-                <div className="card">
-                    <h3>Saved Competitors</h3>
-                    {competitors.map(comp => (
-                        <div key={comp.id} className="competitor-item">
-                            <div>
-                                <p className="competitor-name">{comp.name}</p>
-                                <p className="competitor-score">
-                                    Total: <span>{comp.total}</span> points
-                                </p>
-                            </div>
-                            <button onClick={() => onDelete(comp.id)} className="delete-button">
-                                <svg className="icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
         </div>
     );
 }

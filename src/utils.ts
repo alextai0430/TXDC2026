@@ -1,5 +1,4 @@
-// ==================== src/utils.ts ====================
-export const calculateTotal = (
+export const calculateTechTotal = (
     scores: Record<string, { difficulty: number; execution: number }>,
     weights: Record<string, number>
 ): string => {
@@ -12,11 +11,15 @@ export const calculateTotal = (
     return total.toFixed(2);
 };
 
-export const saveToStorage = (data: any): void => {
+export const calculatePerfTotal = (scores: Record<string, number>): string => {
+    return Object.values(scores).reduce((sum, val) => sum + val, 0).toFixed(2);
+};
+
+export const saveToCache = (data: any): void => {
     sessionStorage.setItem('diaboloData', JSON.stringify(data));
 };
 
-export const loadFromStorage = (): any => {
+export const loadFromCache = (): any => {
     const saved = sessionStorage.getItem('diaboloData');
     return saved ? JSON.parse(saved) : null;
 };

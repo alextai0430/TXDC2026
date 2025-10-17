@@ -1,6 +1,6 @@
 // ==================== src/components/AdminTab.tsx ====================
 import React from 'react';
-import { CATEGORIES } from '../types';
+import { CATEGORIES } from './types';
 
 interface AdminTabProps {
     testMode: boolean;
