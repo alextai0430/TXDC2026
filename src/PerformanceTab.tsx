@@ -14,6 +14,14 @@ interface PerformanceTabProps {
     onPerfWeightChange: (category: string, weight: number) => void;
 }
 
+const categoryDescriptions: Record<string, string> = {
+    'Showmanship': 'Expressiveness and emotional projection',
+    'Composition': "Highs & lows of performance, emotions etc - how your performance is put together, matching overall vibe of song/structure",
+    'Music Interpretation': 'How well it goes with the music - do you hit the beats, not just background noise, thought put into trick placement',
+    'Style/Entertainment': 'Acrobatics, different ways of moving your yoyo/yoyoing, uniqueness',
+    'Control': 'Flow, ease of use, comfort'
+};
+
 export default function PerformanceTab({
                                            competitorName,
                                            setCompetitorName,
@@ -49,7 +57,12 @@ export default function PerformanceTab({
                 {PERF_CATEGORIES.map(category => (
                     <div key={category} className="category-card">
                         <div className="category-header">
-                            <h4 className="category-title">{category}</h4>
+                            <div>
+                                <h4 className="category-title">{category}</h4>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.25rem 0 0 0' }}>
+                                    {categoryDescriptions[category]}
+                                </p>
+                            </div>
                             {testMode && (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <label style={{ fontSize: '0.875rem', color: '#6b7280' }}>Weight:</label>

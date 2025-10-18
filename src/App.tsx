@@ -35,9 +35,11 @@ function App() {
         Flow: 0
     });
     const [perfWeights, setPerfWeights] = useState<Record<string, number>>({
-        Choreography: 1,
-        Performance: 1,
-        Flow: 1
+        Showmanship: 1,
+        Composition: 1,
+        'Music Interpretation': 1,
+        'Style/Entertainment': 1,
+        Control: 1
     });
 
     // Load from cache on mount
