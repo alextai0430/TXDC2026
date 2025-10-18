@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Login from './Login';
 import TechnicalTab from './TechnicalTab';
 import PerformanceTab from './PerformanceTab';
-import SavedCompetitorsTab from './SavedCompetitors';
+import SavedCompetitorsTab from './SavedCompetitorsTab';
 import AdminTab from './AdminTab';
 import { CATEGORIES, DEFAULT_WEIGHTS, Score, Competitor } from './types';
 import { calculateTechTotal, calculatePerfTotal, saveToCache, loadFromCache } from './utils';
@@ -11,10 +11,10 @@ function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [cachedUsers, setCachedUsers] = useState<Array<{ username: string; password: string }>>([]);
     const [activeTab, setActiveTab] = useState('tech-scoring');
     const [testMode, setTestMode] = useState(false);
     const [lightMode, setLightMode] = useState(false);
+    const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
     const [weights, setWeights] = useState(DEFAULT_WEIGHTS);
     const [competitors, setCompetitors] = useState<Competitor[]>([]);
 
@@ -34,6 +34,11 @@ function App() {
         Performance: 0,
         Flow: 0
     });
+    const [perfWeights, setPerfWeights] = useState<Record<string, number>>({
+        Choreography: 1,
+        Performance: 1,
+        Flow: 1
+    });
 
     // Load from cache on mount
     useEffect(() => {
@@ -43,7 +48,6 @@ function App() {
             setWeights(data.weights || DEFAULT_WEIGHTS);
             setTestMode(data.testMode || false);
             setLightMode(data.lightMode || false);
-            setCachedUsers(data.cachedUsers || []);
         }
         document.title = 'TXDC2026';
     }, []);
@@ -51,18 +55,16 @@ function App() {
     // Save to cache whenever state changes
     useEffect(() => {
         if (isAuthenticated) {
-            saveToCache({ competitors, weights, testMode, lightMode, cachedUsers });
+            saveToCache({ competitors, weights, testMode, lightMode });
         }
-    }, [competitors, weights, testMode, lightMode, cachedUsers, isAuthenticated]);
+    }, [competitors, weights, testMode, lightMode, isAuthenticated]);
 
     const handleLogin = () => {
-        if (username && password === 'diabolo2026') {
-            setIsAuthenticated(true);
+        const validUsername = process.env.REACT_APP_USERNAME;
+        const validPassword = process.env.REACT_APP_PASSWORD;
 
-            // Add to cached users if not already there
-            if (!cachedUsers.find(u => u.username === username)) {
-                setCachedUsers([...cachedUsers, { username, password }]);
-            }
+        if (username === validUsername && password === validPassword) {
+            setIsAuthenticated(true);
         } else {
             alert('Incorrect username or password');
         }
@@ -140,7 +142,6 @@ function App() {
                 setPassword={setPassword}
                 onLogin={handleLogin}
                 lightMode={lightMode}
-                cachedUsers={cachedUsers}
             />
         );
     }
@@ -150,9 +151,8 @@ function App() {
             <div className="header">
                 <div className="header-container">
                     <h1 onClick={() => setLightMode(!lightMode)}>
-                        Texas Diabolo Competition 2026
+                        Texas Diabolo Competition
                     </h1>
-                    <p>Technical Scoring System</p>
                 </div>
             </div>
 
@@ -234,6 +234,7 @@ function App() {
                         total={calculateTechTotal(techScores, weights)}
                         onScoreChange={handleTechScoreChange}
                         onSave={saveTechCompetitor}
+                        onWeightChange={(category: string, weight: number) => setWeights({ ...weights, [category]: weight })}
                     />
                 )}
                 {activeTab === 'perf-scoring' && (
@@ -241,24 +242,26 @@ function App() {
                         competitorName={perfCompetitorName}
                         setCompetitorName={setPerfCompetitorName}
                         scores={perfScores}
-                        total={calculatePerfTotal(perfScores)}
+                        total={calculatePerfTotal(perfScores, perfWeights)}
+                        testMode={testMode}
                         onScoreChange={handlePerfScoreChange}
                         onSave={savePerfCompetitor}
+                        perfWeights={perfWeights}
+                        onPerfWeightChange={(category: string, weight: number) => setPerfWeights({ ...perfWeights, [category]: weight })}
                     />
                 )}
                 {activeTab === 'saved' && (
                     <SavedCompetitorsTab
                         competitors={competitors}
-                        onDelete={(id) => setCompetitors(prev => prev.filter(c => c.id !== id))}
+                        onDelete={(id: number) => setCompetitors(prev => prev.filter(c => c.id !== id))}
                     />
                 )}
                 {activeTab === 'admin' && (
                     <AdminTab
                         testMode={testMode}
                         setTestMode={setTestMode}
-                        weights={weights}
-                        setWeights={setWeights}
-                        onResetWeights={() => setWeights(DEFAULT_WEIGHTS)}
+                        isAdminAuthenticated={isAdminAuthenticated}
+                        setIsAdminAuthenticated={setIsAdminAuthenticated}
                     />
                 )}
             </div>

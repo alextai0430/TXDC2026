@@ -1,5 +1,6 @@
 import React from 'react';
 import { CATEGORIES, DIFFICULTY_OPTIONS, Score } from './types';
+import { calculateTechMax } from './utils';
 
 interface TechnicalTabProps {
     competitorName: string;
@@ -10,6 +11,7 @@ interface TechnicalTabProps {
     total: string;
     onScoreChange: (category: string, type: 'difficulty' | 'execution', value: number) => void;
     onSave: () => void;
+    onWeightChange: (category: string, weight: number) => void;
 }
 
 export default function TechnicalTab({
@@ -20,8 +22,11 @@ export default function TechnicalTab({
                                          testMode,
                                          total,
                                          onScoreChange,
-                                         onSave
+                                         onSave,
+                                         onWeightChange
                                      }: TechnicalTabProps) {
+    const maxPoints = calculateTechMax(weights);
+
     return (
         <div>
             <div className="card">
@@ -45,7 +50,36 @@ export default function TechnicalTab({
                     <div key={category} className="category-card">
                         <div className="category-header">
                             <h4 className="category-title">{category}</h4>
-                            {testMode && <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>Weight: {weights[category]}x</span>}
+                            {testMode && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <label style={{ fontSize: '0.875rem', color: '#6b7280' }}>Weight:</label>
+                                    <input
+                                        type="text"
+                                        value={weights[category]}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            onWeightChange(category, val as any);
+                                        }}
+                                        onBlur={(e) => {
+                                            const val = e.target.value;
+                                            if (val === '' || isNaN(parseFloat(val))) {
+                                                onWeightChange(category, 0);
+                                            } else {
+                                                onWeightChange(category, parseFloat(val));
+                                            }
+                                        }}
+                                        style={{
+                                            width: '60px',
+                                            padding: '0.25rem 0.5rem',
+                                            border: '2px solid var(--border-color)',
+                                            borderRadius: '0.5rem',
+                                            background: 'var(--bg-secondary)',
+                                            color: 'var(--text-primary)',
+                                            fontFamily: 'inherit',
+                                        }}
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         <div style={{ marginBottom: '1rem' }}>
@@ -86,7 +120,7 @@ export default function TechnicalTab({
                     <div className="total-info">
                         <p>Total Score</p>
                         <p className="total-score">{total}</p>
-                        <p>out of 140 points</p>
+                        <p>out of {maxPoints} points</p>
                     </div>
                     <button onClick={onSave} className="save-button">
                         <svg className="icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">

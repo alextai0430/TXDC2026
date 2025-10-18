@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 
 interface LoginProps {
     username: string;
@@ -7,7 +7,6 @@ interface LoginProps {
     setPassword: (password: string) => void;
     onLogin: () => void;
     lightMode: boolean;
-    cachedUsers: Array<{ username: string; password: string }>;
 }
 
 export default function Login({
@@ -16,10 +15,34 @@ export default function Login({
                                   password,
                                   setPassword,
                                   onLogin,
-                                  lightMode,
-                                  cachedUsers
+                                  lightMode
                               }: LoginProps) {
-    const [showCached, setShowCached] = useState(false);
+    const validUsername = process.env.REACT_APP_USERNAME;
+    const validPassword = process.env.REACT_APP_PASSWORD;
+
+    // Load cached credentials on mount
+    useEffect(() => {
+        const cached = localStorage.getItem('loginCredentials');
+        if (cached) {
+            try {
+                const { username: cachedUsername, password: cachedPassword } = JSON.parse(cached);
+                setUsername(cachedUsername);
+                setPassword(cachedPassword);
+            } catch (e) {
+                // Ignore parsing errors
+            }
+        }
+    }, [setUsername, setPassword]);
+
+    const handleLogin = () => {
+        if (username === validUsername && password === validPassword) {
+            // Cache credentials for next time
+            localStorage.setItem('loginCredentials', JSON.stringify({ username, password }));
+            onLogin();
+        } else {
+            alert('Incorrect username or password');
+        }
+    };
 
     return (
         <div className={`login-container ${lightMode ? 'light-mode' : ''}`}>
@@ -46,57 +69,33 @@ export default function Login({
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                                const passwordInput = document.querySelector('input[type="password"]') as HTMLInputElement;
+                                passwordInput?.focus();
+                            }
+                        }}
                         className="input-field"
                         placeholder="Enter username"
+                        autoFocus
                     />
                 </div>
-                <div style={{ marginTop: '1rem' }}>
+                <div style={{ marginTop: '2rem' }}>
                     <label className="input-label">Password</label>
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && onLogin()}
+                        onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
                         className="input-field"
                         placeholder="Enter password"
                     />
                 </div>
-                <button onClick={onLogin} className="login-button">
-                    Sign In
-                </button>
-                {cachedUsers.length > 0 && (
-                    <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-                        <button
-                            onClick={() => setShowCached(!showCached)}
-                            className="login-button"
-                            style={{ background: '#6b7280' }}
-                        >
-                            {showCached ? 'Hide' : 'Show'} Cached Users
-                        </button>
-                        {showCached && (
-                            <div style={{ marginTop: '1rem', textAlign: 'left' }}>
-                                {cachedUsers.map(user => (
-                                    <div
-                                        key={user.username}
-                                        style={{
-                                            padding: '0.5rem',
-                                            background: 'rgba(230,126,34,0.1)',
-                                            borderRadius: '0.5rem',
-                                            marginBottom: '0.5rem',
-                                            cursor: 'pointer'
-                                        }}
-                                        onClick={() => {
-                                            setUsername(user.username);
-                                            setPassword(user.password);
-                                        }}
-                                    >
-                                        <p style={{ margin: 0, fontWeight: 600 }}>{user.username}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
+                <div style={{ marginTop: '2.5rem' }}>
+                    <button onClick={handleLogin} className="login-button">
+                        Sign In
+                    </button>
+                </div>
             </div>
         </div>
     );

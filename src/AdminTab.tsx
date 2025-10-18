@@ -1,25 +1,91 @@
-// ==================== src/components/AdminTab.tsx ====================
-import React from 'react';
-import { CATEGORIES } from './types';
+import React, { useState } from 'react';
 
 interface AdminTabProps {
     testMode: boolean;
     setTestMode: (mode: boolean) => void;
-    weights: Record<string, number>;
-    setWeights: (weights: Record<string, number>) => void;
-    onResetWeights: () => void;
+    isAdminAuthenticated: boolean;
+    setIsAdminAuthenticated: (auth: boolean) => void;
 }
 
 export default function AdminTab({
                                      testMode,
                                      setTestMode,
-                                     weights,
-                                     setWeights,
-                                     onResetWeights
+                                     isAdminAuthenticated,
+                                     setIsAdminAuthenticated
                                  }: AdminTabProps) {
+    const [adminUsername, setAdminUsername] = useState('');
+    const [adminPassword, setAdminPassword] = useState('');
+
+    const handleAdminLogin = () => {
+        const validUsername = process.env.REACT_APP_ADMIN_USERNAME;
+        const validPassword = process.env.REACT_APP_ADMIN_PASSWORD;
+
+        if (adminUsername === validUsername && adminPassword === validPassword) {
+            setIsAdminAuthenticated(true);
+        } else {
+            alert('Incorrect admin credentials');
+            setAdminUsername('');
+            setAdminPassword('');
+        }
+    };
+
+    const handleLogout = () => {
+        setIsAdminAuthenticated(false);
+        setAdminUsername('');
+        setAdminPassword('');
+        setTestMode(false);
+    };
+
+    if (!isAdminAuthenticated) {
+        return (
+            <div className="card">
+                <h2>Admin Access</h2>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Enter admin credentials to access settings</p>
+
+                <div style={{ marginBottom: '1rem' }}>
+                    <label className="input-label">Admin Username</label>
+                    <input
+                        type="text"
+                        value={adminUsername}
+                        onChange={(e) => setAdminUsername(e.target.value)}
+                        onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                                const passwordInput = document.querySelector('input[type="password"]') as HTMLInputElement;
+                                passwordInput?.focus();
+                            }
+                        }}
+                        className="input-field"
+                        placeholder="Enter admin username"
+                    />
+                </div>
+
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <label className="input-label">Admin Password</label>
+                    <input
+                        type="password"
+                        value={adminPassword}
+                        onChange={(e) => setAdminPassword(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
+                        className="input-field"
+                        placeholder="Enter admin password"
+                    />
+                </div>
+
+                <button onClick={handleAdminLogin} className="save-button" style={{ width: '100%', justifyContent: 'center' }}>
+                    Access Admin Settings
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="card">
-            <h2>Admin Settings</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h2>Admin Settings</h2>
+                <button onClick={handleLogout} className="delete-button">
+                    Logout
+                </button>
+            </div>
 
             <div className="admin-toggle">
                 <label>
@@ -28,35 +94,10 @@ export default function AdminTab({
                         checked={testMode}
                         onChange={(e) => setTestMode(e.target.checked)}
                     />
-                    <span>Enable Test Mode</span>
+                    <span>Test Mode Enabled</span>
                 </label>
-                <p>Allows modification of category weights for testing purposes</p>
+                <p>When enabled, you can adjust category weights in the scoring tabs</p>
             </div>
-
-            {testMode && (
-                <div>
-                    <h3>Category Weights</h3>
-                    <div className="weights-grid">
-                        {CATEGORIES.map(category => (
-                            <div key={category} className="weight-input">
-                                <label>{category}</label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    value={weights[category]}
-                                    onChange={(e) => setWeights({
-                                        ...weights,
-                                        [category]: parseFloat(e.target.value) || 0
-                                    })}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                    <button onClick={onResetWeights} className="reset-button">
-                        Reset to Default Weights
-                    </button>
-                </div>
-            )}
         </div>
     );
 }

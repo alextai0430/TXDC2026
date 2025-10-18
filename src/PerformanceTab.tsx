@@ -1,13 +1,17 @@
 import React from 'react';
 import { PERF_CATEGORIES, PERF_OPTIONS } from './types';
+import { calculatePerfMax } from './utils';
 
 interface PerformanceTabProps {
     competitorName: string;
     setCompetitorName: (name: string) => void;
     scores: Record<string, number>;
     total: string;
+    testMode: boolean;
     onScoreChange: (category: string, value: number) => void;
     onSave: () => void;
+    perfWeights: Record<string, number>;
+    onPerfWeightChange: (category: string, weight: number) => void;
 }
 
 export default function PerformanceTab({
@@ -15,9 +19,14 @@ export default function PerformanceTab({
                                            setCompetitorName,
                                            scores,
                                            total,
+                                           testMode,
                                            onScoreChange,
-                                           onSave
+                                           onSave,
+                                           perfWeights,
+                                           onPerfWeightChange
                                        }: PerformanceTabProps) {
+    const maxPoints = calculatePerfMax(perfWeights);
+
     return (
         <div>
             <div className="card">
@@ -32,12 +41,45 @@ export default function PerformanceTab({
             </div>
 
             <div className="card">
-                <h3>Performance Categories</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h3>Performance Categories</h3>
+                    {testMode && <span className="test-mode-badge">Test Mode Active</span>}
+                </div>
 
                 {PERF_CATEGORIES.map(category => (
                     <div key={category} className="category-card">
                         <div className="category-header">
                             <h4 className="category-title">{category}</h4>
+                            {testMode && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <label style={{ fontSize: '0.875rem', color: '#6b7280' }}>Weight:</label>
+                                    <input
+                                        type="text"
+                                        value={perfWeights[category]}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            onPerfWeightChange(category, val as any);
+                                        }}
+                                        onBlur={(e) => {
+                                            const val = e.target.value;
+                                            if (val === '' || isNaN(parseFloat(val))) {
+                                                onPerfWeightChange(category, 0);
+                                            } else {
+                                                onPerfWeightChange(category, parseFloat(val));
+                                            }
+                                        }}
+                                        style={{
+                                            width: '60px',
+                                            padding: '0.25rem 0.5rem',
+                                            border: '2px solid var(--border-color)',
+                                            borderRadius: '0.5rem',
+                                            background: 'var(--bg-secondary)',
+                                            color: 'var(--text-primary)',
+                                            fontFamily: 'inherit',
+                                        }}
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         <label className="score-label">{category} (0-20)</label>
@@ -61,7 +103,7 @@ export default function PerformanceTab({
                     <div className="total-info">
                         <p>Total Score</p>
                         <p className="total-score">{total}</p>
-                        <p>out of 60 points</p>
+                        <p>out of {maxPoints} points</p>
                     </div>
                     <button onClick={onSave} className="save-button">
                         <svg className="icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
