@@ -1,13 +1,18 @@
 export const calculateTechTotal = (
-    scores: Record<string, { difficulty: number; execution: number }>,
-    weights: Record<string, number>
+    scores: Record<string, { difficulty: number }>,
+    weights: Record<string, number>,
+    deductions: number
 ): string => {
     let total = 0;
     Object.keys(scores).forEach(cat => {
         const weight = weights[cat] || 1;
-        const { difficulty, execution } = scores[cat];
-        total += (difficulty + execution) * weight;
+        const { difficulty } = scores[cat];
+        total += difficulty * weight;
     });
+
+    // Subtract global deductions (not weighted)
+    total -= deductions;
+
     return total.toFixed(2);
 };
 
@@ -15,7 +20,7 @@ export const calculateTechMax = (weights: Record<string, number>): string => {
     let max = 0;
     Object.keys(weights).forEach(cat => {
         const weight = weights[cat] || 1;
-        max += 20 * weight; // 20 = max difficulty (10) + max execution (10)
+        max += 10 * weight; // 10 = max difficulty per category
     });
     return max.toFixed(2);
 };

@@ -28,16 +28,18 @@ export default function SavedCompetitorsTab({
                                         <div style={{ marginTop: '0.75rem' }}>
                                             {CATEGORIES.map(cat => {
                                                 const score = techComp.scores[cat];
-                                                const categoryTotal = (score.difficulty + score.execution).toFixed(2);
                                                 return (
                                                     <div key={cat} style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                                                        <strong>{cat}:</strong> Difficulty {score.difficulty} + Execution {score.execution} = {categoryTotal}
+                                                        <strong>{cat}:</strong> Difficulty {score.difficulty}
                                                     </div>
                                                 );
                                             })}
+                                            <div style={{ fontSize: '0.875rem', color: '#ef4444', marginTop: '0.5rem', fontWeight: 'bold' }}>
+                                                Deductions: -{techComp.deductions.toFixed(2)}
+                                            </div>
                                         </div>
                                         <p className="competitor-score" style={{ marginTop: '0.75rem' }}>
-                                            Total: <span>{comp.total}</span> / 140 points (Technical)
+                                            Total: <span>{comp.total}</span> / 70 points (Technical)
                                         </p>
                                     </div>
                                     <button onClick={() => onDelete(comp.id)} className="delete-button" style={{ marginLeft: '1rem' }}>
@@ -78,7 +80,7 @@ export default function SavedCompetitorsTab({
                                             })}
                                         </div>
                                         <p className="competitor-score" style={{ marginTop: '0.75rem' }}>
-                                            Total: <span>{comp.total}</span> / 60 points (Performance)
+                                            Total: <span>{comp.total}</span> / 100 points (Performance)
                                         </p>
                                     </div>
                                     <button onClick={() => onDelete(comp.id)} className="delete-button" style={{ marginLeft: '1rem' }}>

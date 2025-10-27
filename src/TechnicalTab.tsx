@@ -1,15 +1,17 @@
 import React from 'react';
-import { CATEGORIES, DIFFICULTY_OPTIONS, Score } from './types';
+import { CATEGORIES, DIFFICULTY_OPTIONS, DEDUCTION_OPTIONS, Score } from './types';
 import { calculateTechMax } from './utils';
 
 interface TechnicalTabProps {
     competitorName: string;
     setCompetitorName: (name: string) => void;
     scores: Record<string, Score>;
+    deductions: number;
     weights: Record<string, number>;
     testMode: boolean;
     total: string;
-    onScoreChange: (category: string, type: 'difficulty' | 'execution', value: number) => void;
+    onScoreChange: (category: string, value: number) => void;
+    onDeductionChange: (value: number) => void;
     onSave: () => void;
     onWeightChange: (category: string, weight: number) => void;
 }
@@ -18,14 +20,24 @@ export default function TechnicalTab({
                                          competitorName,
                                          setCompetitorName,
                                          scores,
+                                         deductions,
                                          weights,
                                          testMode,
                                          total,
                                          onScoreChange,
+                                         onDeductionChange,
                                          onSave,
                                          onWeightChange
                                      }: TechnicalTabProps) {
     const maxPoints = calculateTechMax(weights);
+
+    const handleDeduction = (deductionValue: number) => {
+        onDeductionChange(deductions + deductionValue);
+    };
+
+    const handleResetDeductions = () => {
+        onDeductionChange(0);
+    };
 
     return (
         <div>
@@ -38,6 +50,37 @@ export default function TechnicalTab({
                     placeholder="Competitor Name"
                     className="input-field"
                 />
+            </div>
+
+            {/* Global Deductions Card */}
+            <div className="card" style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1))', border: '2px solid #ef4444' }}>
+                <div style={{ marginBottom: '1rem' }}>
+                    <h3 style={{ color: '#ef4444', marginBottom: '0.5rem' }}>Deductions</h3>
+                    <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>
+                        Total: <span style={{ color: '#ef4444' }}>-{deductions.toFixed(2)}</span> points
+                    </p>
+                </div>
+
+                <label className="score-label">Add Deduction (applies to overall score)</label>
+                <div className="score-buttons">
+                    {DEDUCTION_OPTIONS.map(option => (
+                        <button
+                            key={option.value}
+                            onClick={() => handleDeduction(option.value)}
+                            className="score-button"
+                            style={{ background: '#fee2e2', color: '#991b1b', border: '2px solid #fca5a5' }}
+                        >
+                            {option.label}
+                        </button>
+                    ))}
+                    <button
+                        onClick={handleResetDeductions}
+                        className="score-button"
+                        style={{ background: '#ef4444', color: 'white', border: '2px solid #ef4444' }}
+                    >
+                        Reset Deductions
+                    </button>
+                </div>
             </div>
 
             <div className="card">
@@ -82,34 +125,17 @@ export default function TechnicalTab({
                             )}
                         </div>
 
-                        <div style={{ marginBottom: '1rem' }}>
-                            <label className="score-label">Difficulty (0-10)</label>
-                            <div className="score-buttons">
-                                {DIFFICULTY_OPTIONS.map(val => (
-                                    <button
-                                        key={val}
-                                        onClick={() => onScoreChange(category, 'difficulty', val)}
-                                        className={`score-button difficulty ${scores[category].difficulty === val ? 'active' : ''}`}
-                                    >
-                                        {val}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="score-label">Execution (0-10)</label>
-                            <div className="score-buttons">
-                                {DIFFICULTY_OPTIONS.map(val => (
-                                    <button
-                                        key={val}
-                                        onClick={() => onScoreChange(category, 'execution', val)}
-                                        className={`score-button execution ${scores[category].execution === val ? 'active' : ''}`}
-                                    >
-                                        {val}
-                                    </button>
-                                ))}
-                            </div>
+                        <label className="score-label">Difficulty (0-10)</label>
+                        <div className="score-buttons">
+                            {DIFFICULTY_OPTIONS.map(val => (
+                                <button
+                                    key={val}
+                                    onClick={() => onScoreChange(category, val)}
+                                    className={`score-button difficulty ${scores[category].difficulty === val ? 'active' : ''}`}
+                                >
+                                    {val}
+                                </button>
+                            ))}
                         </div>
                     </div>
                 ))}

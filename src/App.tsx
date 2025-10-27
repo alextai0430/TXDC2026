@@ -22,10 +22,11 @@ function App() {
     const [techCompetitorName, setTechCompetitorName] = useState('');
     const [techScores, setTechScores] = useState<Record<string, Score>>(
         CATEGORIES.reduce(
-            (acc, cat) => ({ ...acc, [cat]: { difficulty: 0, execution: 0 } }),
+            (acc, cat) => ({ ...acc, [cat]: { difficulty: 0 } }),
             {} as Record<string, Score>
         )
     );
+    const [techDeductions, setTechDeductions] = useState(0);
 
     // Performance scoring state
     const [perfCompetitorName, setPerfCompetitorName] = useState('');
@@ -72,10 +73,10 @@ function App() {
         }
     };
 
-    const handleTechScoreChange = (category: string, type: 'difficulty' | 'execution', value: number) => {
+    const handleTechScoreChange = (category: string, value: number) => {
         setTechScores(prev => ({
             ...prev,
-            [category]: { ...prev[category], [type]: value }
+            [category]: { difficulty: value }
         }));
     };
 
@@ -96,7 +97,8 @@ function App() {
             id: Date.now(),
             name: techCompetitorName,
             scores: techScores,
-            total: calculateTechTotal(techScores, weights),
+            deductions: techDeductions,
+            total: calculateTechTotal(techScores, weights, techDeductions),
             timestamp: new Date().toISOString(),
             judgeType: 'technical'
         };
@@ -105,10 +107,11 @@ function App() {
         setTechCompetitorName('');
         setTechScores(
             CATEGORIES.reduce(
-                (acc, cat) => ({ ...acc, [cat]: { difficulty: 0, execution: 0 } }),
+                (acc, cat) => ({ ...acc, [cat]: { difficulty: 0 } }),
                 {} as Record<string, Score>
             )
         );
+        setTechDeductions(0);
     };
 
     const savePerfCompetitor = () => {
@@ -231,10 +234,12 @@ function App() {
                         competitorName={techCompetitorName}
                         setCompetitorName={setTechCompetitorName}
                         scores={techScores}
+                        deductions={techDeductions}
                         weights={weights}
                         testMode={testMode}
-                        total={calculateTechTotal(techScores, weights)}
+                        total={calculateTechTotal(techScores, weights, techDeductions)}
                         onScoreChange={handleTechScoreChange}
+                        onDeductionChange={setTechDeductions}
                         onSave={saveTechCompetitor}
                         onWeightChange={(category: string, weight: number) => setWeights({ ...weights, [category]: weight })}
                     />
